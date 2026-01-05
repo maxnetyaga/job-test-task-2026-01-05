@@ -29,5 +29,13 @@ class EventInvite(models.Model):
         choices=models.TextChoices("EventInviteState", "PENDING ACCEPTED"),
     )
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "event"],
+                name="unique_user_event_invite",
+            )
+        ]
+
     def __str__(self) -> str:
         return f"{self.event.title} ({self.event.pk}) | {self.user} ({self.pk})"
