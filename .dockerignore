@@ -1,0 +1,13 @@
+__pycache__/
+.git/
+.gitignore
+db.sqlite3
+task.pdf
+.venv
+.env
+.envrc
+Dockerfile
+docker-compose.yml
+.dockerignore
+.ruff_cache/
+openapi*.yml
