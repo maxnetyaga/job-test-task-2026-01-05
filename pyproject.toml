@@ -8,6 +8,7 @@ dependencies = [
     "django>=6.0",
     "django-stubs[compatible-mypy]>=5.2.8",
     "djangorestframework>=3.16.1",
+    "djangorestframework-simplejwt>=5.5.1",
     "djangorestframework-stubs[compatible-mypy]>=3.16.6",
     "drf-spectacular[sidecar]>=0.29.0",
     "ipython>=9.8.0",
