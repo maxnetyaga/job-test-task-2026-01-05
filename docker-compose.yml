@@ -12,12 +12,6 @@ services:
     restart: unless-stopped
     environment:
       SECRET_KEY: "q=401@1lb%^z&s8nw!5q#a8@cul(j&yetamrv8=*_s@^r335da" # Set your own
-    healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/admin/')"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
 
 volumes:
   db-data:

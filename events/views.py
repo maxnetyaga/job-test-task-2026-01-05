@@ -1,3 +1,4 @@
+from django.db import models
 from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import extend_schema
 from rest_framework import permissions, status, viewsets
@@ -5,6 +6,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from . import permissions as event_permissions
+from .filters import EventFilter
 from .models import Event, EventInvite
 from .serializers import EventSerializer
 
@@ -17,6 +19,17 @@ class EventViewSet(viewsets.ModelViewSet):
         event_permissions.IsEventOrganizerOrInvited,
         event_permissions.OnlyEventOrganizerEditoOrDelete,
     ]
+    filterset_class = EventFilter
+    search_fields = ["title", "description", "location"]
+    ordering_fields = ["date", "created", "title"]
+    ordering = ["-created"]
+
+    def get_queryset(self):
+        user = self.request.user
+        queryset = Event.objects.filter(
+            models.Q(organizer=user) | models.Q(invites=user)
+        ).distinct()
+        return queryset
 
     def perform_create(self, serializer):
         serializer.save(organizer=self.request.user)
