@@ -1,0 +1,15 @@
+[project]
+name = "test-task-2025-12-30"
+version = "0.1.0"
+description = "Join2IT test task"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "django>=6.0",
+    "django-stubs[compatible-mypy]>=5.2.8",
+    "djangorestframework>=3.16.1",
+    "djangorestframework-stubs[compatible-mypy]>=3.16.6",
+    "drf-spectacular[sidecar]>=0.29.0",
+    "ipython>=9.8.0",
+    "markdown>=3.10",
+]
