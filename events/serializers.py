@@ -3,6 +3,7 @@ from typing import cast
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
+from .emails import send_event_invitation_email
 from .models import Event
 
 User = get_user_model()
@@ -15,7 +16,7 @@ class EmailManyToManyField(serializers.ListField):
 
     def to_representation(self, value):
         if hasattr(value, "all"):
-            return [user.email for user in value.all()]
+            return [user.email for user in value.all()]  # pyright: ignore[reportAttributeAccessIssue]
 
         raise Exception(
             "Model's field doesn't implement Django BaseManager's all() method."
@@ -69,6 +70,9 @@ class EventSerializer(serializers.ModelSerializer):
         invited_users = User.objects.filter(email__in=invite_emails)
         event.invites.set(invited_users)
 
+        if invited_users.exists():
+            send_event_invitation_email(event, invited_users)
+
         return event
 
     def update(self, instance, validated_data):
@@ -80,13 +84,28 @@ class EventSerializer(serializers.ModelSerializer):
             setattr(instance, attr, value)
         instance.save()
 
-        if invite_emails is not None:
-            invited_users = User.objects.filter(email__in=invite_emails)
-            request = self.context.get("request")
+        if invite_emails is None:
+            return instance
 
-            if request and request.method == "PUT":
-                instance.invites.set(invited_users)
-            elif request and request.method == "PATCH":
-                instance.invites.add(*invited_users)
+        invited_users = User.objects.filter(email__in=invite_emails)
+        request = self.context.get("request")
+
+        if request and request.method == "PUT":
+            instance.invites.set(invited_users)
+            if not invited_users.exists():
+                send_event_invitation_email(instance, invited_users)
+
+        elif request and request.method == "PATCH":
+            existing_invites = instance.invites.values_list("id", flat=True)
+            new_invites = [
+                user
+                for user in invited_users
+                if user.id not in existing_invites  # pyright: ignore[reportAttributeAccessIssue]
+            ]
+
+            instance.invites.add(*new_invites)
+
+            if new_invites:
+                send_event_invitation_email(instance, new_invites)
 
         return instance
